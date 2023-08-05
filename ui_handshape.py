@@ -340,7 +340,7 @@ def selection_to_image(_container, label):
     except:
         _container.write(f'{label=}')
 
-def create_form(animate_flag: bool):
+def create_form(animate_flag: bool, frame_buffer:int, n_freeze_frames:int):
 # Read in (most recent) file with same sign name & populate selection value 
     # if frame already defined
     # csvs = glob(f'label_all*{SIGN_NAME}*.csv')
@@ -368,6 +368,8 @@ def create_form(animate_flag: bool):
                 frame_idx=frame_idx,
                 _col=col1,
                 animate=animate_flag,
+                frame_buffer=frame_buffer,
+                n_freeze_frames=n_freeze_frames,
             )
             # col1.write(f'')
             col2.selectbox(
@@ -397,6 +399,18 @@ with preform:
         step=5,
     )
     animation_flag = st.checkbox(label='animate_flag', value=False)
+    frame_buffer = st.number_input(
+        min_value=1,
+        value=10,
+        label='frame buffer',
+        step=1,
+    )
+    n_freeze_frames = st.number_input(
+        min_value=1,
+        value=10,
+        label='freeze frames',
+        step=1,
+    )
     submitted_preform = st.form_submit_button('Cluster Frames')
 
 if submitted_preform:
@@ -407,4 +421,8 @@ if submitted_preform:
     )
 
     results_container = st.container()
-    create_form(animation_flag)
+    create_form(
+        animate_flag=animation_flag,
+        frame_buffer=frame_buffer,
+        n_freeze_frames=n_freeze_frames,
+    )
