@@ -206,6 +206,7 @@ def show_rep_images(
     X: npt.ArrayLike,
     n_clusters: int,
     columns: list[str],
+    show_animations: bool,
 ) -> npt.ArrayLike:
     # Get clustering
     print('Start clustering')
@@ -312,20 +313,21 @@ def create_form():
 preform = st.form('labeling_preset')
 
 with preform:
-    N_CLUSTERS = st.number_input(
+    n_clusters = st.number_input(
         min_value=5,
         value=10,
         label='clusters',
         step=5,
     )
-
+    animation_flag = st.checkbox(label='animate_flag', value=False)
     submitted_preform = st.form_submit_button('Cluster Frames')
 
 if submitted_preform:
     frame_index = show_rep_images(
         data.values,
-        n_clusters=N_CLUSTERS,
+        n_clusters=n_clusters,
         columns=list(data.columns),
+        show_animations=animation_flag,
     )
 
     results_container = st.container()
