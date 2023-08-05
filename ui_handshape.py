@@ -51,9 +51,10 @@ def load_selection_images():
     return images
 
 @st.cache_data
-def load_data(sample_size: int | None = None) -> pd.DataFrame:
-    df_data = pd.read_csv(f'{DATA_DIR}/train.csv')
-    pq_path = df_data['path'].unique()[0]
+def load_data(
+    pq_path: str,
+    sample_size: int | None = None,
+) -> pd.DataFrame:
     df_pq = pd.read_parquet(f'{DATA_DIR}/{pq_path}')
     # Remove everything except the right hand
     data = df_pq[
@@ -87,21 +88,6 @@ def read_dict(file_path):
         d = json.load(f)
     return d
 
-
-# Load data
-# data = load_data(sample_size=1_000) # TODO: Allow sample size by choosing
-data_full = load_data(sample_size=None)
-data = (
-    data_full
-    .drop(
-        [
-            'phrase',
-            'frame',
-        ],
-        axis=1,
-    )
-)
-st.write(data.head())
 
 
 def get_representative_images(
@@ -371,6 +357,7 @@ def create_form(animate_flag: bool, frame_buffer:int, n_freeze_frames:int):
                 frame_buffer=frame_buffer,
                 n_freeze_frames=n_freeze_frames,
             )
+            # TODO: Display other frames that are close to representative frame
             # col1.write(f'')
             col2.selectbox(
                 'handshape',
@@ -391,7 +378,16 @@ def create_form(animate_flag: bool, frame_buffer:int, n_freeze_frames:int):
 ### MAIN
 preform = st.form('labeling_preset')
 
+# Load data
+# data = load_data(sample_size=1_000) # TODO: Allow sample size by choosing
+df_data = pd.read_csv(f'{DATA_DIR}/train.csv')
+paths = df_data['path'].unique()
+
 with preform:
+    pq_path = st.selectbox(
+        label=f'Data to load ({len(paths)} files)',
+        options=paths,
+    )
     n_clusters = st.number_input(
         min_value=5,
         value=10,
@@ -414,6 +410,20 @@ with preform:
     submitted_preform = st.form_submit_button('Cluster Frames')
 
 if submitted_preform:
+    data_full = load_data(pq_path=pq_path, sample_size=None)
+    data = (
+        data_full
+        .drop(
+            [
+                'phrase',
+                'frame',
+            ],
+            axis=1,
+        )
+    )
+    st.write(f'## File Loaded: `{pq_path}`')
+    st.write(data.head())
+
     frame_index = show_rep_images(
         data.values,
         n_clusters=n_clusters,
