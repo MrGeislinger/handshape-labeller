@@ -245,7 +245,7 @@ def display_frame(
     _col,
     animate: bool = True,
     frame_buffer: int = 10,
-    n_freeze_frames: int = 5,
+    n_freeze_frames: int = 3,
 ):
     if animate:
         fig, (ax_img, ax_anim) = plt.subplots(nrows=2, figsize=(2,4))
@@ -274,25 +274,30 @@ def display_frame(
             labelbottom=False,
             labelleft=False,
         )
+        
+        # Animate a subset of frames
+        rel_frame = data_full.iloc[frame_idx]['frame']
+        seq_id = data_full.iloc[[frame_idx]].index.values[0]
+        frame_subset = data_full[data_full.index == seq_id]
+
         def animation_frame(f_idx):
             ax_anim.cla()
-            plot_handshape(frame=frame_data.iloc[[f_idx]], ax=ax_anim)
-            if frame_idx == f_idx:
+            plot_handshape(frame=frame_subset.iloc[[f_idx]], ax=ax_anim)
+            if rel_frame == f_idx:
                 ax_anim.set_facecolor('#D3D3D3')
             else:
                 ax_anim.set_facecolor('w')
-            ax_anim.set_title(f_idx)
+            ax_anim.set_title(f'{f_idx:03} of {len(frame_subset)}')
 
-        # Animate a subset of frames
         frames_to_animate = (
             [
                 f_idx
-                for f_idx in range(max(0, frame_idx - frame_buffer), frame_idx)
+                for f_idx in range(max(0,rel_frame-frame_buffer), rel_frame)
             ]
-            + [frame_idx] * n_freeze_frames
+            + [rel_frame] * n_freeze_frames
             + [
                 f_idx
-                for f_idx in range(frame_idx, frame_idx + frame_buffer)
+                for f_idx in range(rel_frame, min(rel_frame+frame_buffer, len(frame_subset)))
             ]
         )
         animation = FuncAnimation(
