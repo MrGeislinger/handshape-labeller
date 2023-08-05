@@ -21,11 +21,10 @@ import joblib
 HANDSHAPE_IMAGES_DIR = 'handshape-images'
 HANDSHAPE_CSV = 'handshapes.csv'
 DATA_DIR = '../ASL-FSR/data'
-N_CLUSTERS = 50
 ##############################################
 
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout='wide')
 
 
 ##########################################
@@ -157,10 +156,10 @@ def get_hand_points(handx, handy, parts_definitions=HAND_PARTS_DEFINITION):
 
 
 def plot_handshape(
-        frame: npt.ArrayLike,
-        ax: plt.Axes,
-        **plot_kwargs,
-    ):
+    frame: npt.ArrayLike,
+    ax: plt.Axes,
+    **plot_kwargs,
+) -> None:
     buffer = 0.1
     xmin = np.nanmin(frame[[col for col in frame.columns if ('x_' in col and 'pose' not in col)]]) - buffer
     xmax = np.nanmax(frame[[col for col in frame.columns if ('x_' in col and 'pose' not in col)]]) + buffer
@@ -212,7 +211,7 @@ def show_rep_images(
     print('Start clustering')
     kmeans = cluster_frames(X, k=n_clusters)
     # joblib.dump(kmeans, f'kmeans-sign_{SIGN_NAME}-{n_clusters}.joblib')
-    
+
     print('get_representative_images')
     rep_frames, rep_frame_idx = get_representative_images(
         X,
@@ -237,15 +236,8 @@ def show_rep_images(
     st.pyplot(fig)
     return rep_frame_idx
 
-frame_index = show_rep_images(
-    data.values,
-    n_clusters=N_CLUSTERS,
-    columns=list(data.columns),
-)
 
 
-
-@st.cache_data()
 def display_choice(
     _frame_data: pd.DataFrame, # Not cached
     frame_idx: int,
@@ -257,7 +249,6 @@ def display_choice(
         st.pyplot(fig)
 
 
-results_container = st.container()
 
 
 def write_labels_to_file():
@@ -315,5 +306,27 @@ def create_form():
             'Save results',
             on_click=write_labels_to_file
         )
-create_form()
-    
+
+
+### MAIN
+preform = st.form('labeling_preset')
+
+with preform:
+    N_CLUSTERS = st.number_input(
+        min_value=5,
+        value=10,
+        label='clusters',
+        step=5,
+    )
+
+    submitted_preform = st.form_submit_button('Cluster Frames')
+
+if submitted_preform:
+    frame_index = show_rep_images(
+        data.values,
+        n_clusters=N_CLUSTERS,
+        columns=list(data.columns),
+    )
+
+    results_container = st.container()
+    create_form()
