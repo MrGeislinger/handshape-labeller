@@ -99,10 +99,10 @@ def animation_and_image(
     )
 
     viz_hand(
-            ax=ax_img,
-            hand_frame=data[main_frame_idx],
-            label=f'Relative frame\n#{main_frame_idx}',
-        )
+        ax=ax_img,
+        hand_frame=data[main_frame_idx],
+        label=f'Relative frame\n#{main_frame_idx}',
+    )
     # Make the animations at the same scale
     axis_min=data.min()
     axis_max=data.max()

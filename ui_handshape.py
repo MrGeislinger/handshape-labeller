@@ -8,6 +8,7 @@ import json
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
 
 from datetime import datetime
 from PIL import Image
@@ -206,7 +207,6 @@ def show_rep_images(
     X: npt.ArrayLike,
     n_clusters: int,
     columns: list[str],
-    show_animations: bool,
 ) -> npt.ArrayLike:
     # Get clustering
     print('Start clustering')
@@ -239,6 +239,78 @@ def show_rep_images(
 
 
 
+def display_frame(
+    frame_data: pd.DataFrame,
+    frame_idx: int,
+    _col,
+    animate: bool = True,
+    frame_buffer: int = 10,
+    n_freeze_frames: int = 5,
+):
+    if animate:
+        fig, (ax_img, ax_anim) = plt.subplots(nrows=2, figsize=(2,4))
+    else:
+        fig, ax_img = plt.subplots(nrows=1, figsize=(2,2))
+    # Remove the axis ticks to make it clearer to read
+    ax_img.tick_params(
+        axis='both',
+        which='both',
+        bottom=False,
+        left=False,
+        labelbottom=False,
+        labelleft=False,
+    )
+    plot_handshape(
+        frame=frame_data.iloc[[frame_idx]],
+        ax=ax_img,
+    )
+
+    if animate:
+        ax_anim.tick_params(
+            axis='both',
+            which='both',
+            bottom=False,
+            left=False,
+            labelbottom=False,
+            labelleft=False,
+        )
+        def animation_frame(f_idx):
+            ax_anim.cla()
+            plot_handshape(frame=frame_data.iloc[[f_idx]], ax=ax_anim)
+            if frame_idx == f_idx:
+                ax_anim.set_facecolor('#D3D3D3')
+            else:
+                ax_anim.set_facecolor('w')
+            ax_anim.set_title(f_idx)
+
+        # Animate a subset of frames
+        frames_to_animate = (
+            [
+                f_idx
+                for f_idx in range(max(0, frame_idx - frame_buffer), frame_idx)
+            ]
+            + [frame_idx] * n_freeze_frames
+            + [
+                f_idx
+                for f_idx in range(frame_idx, frame_idx + frame_buffer)
+            ]
+        )
+        animation = FuncAnimation(
+            fig,
+            func=animation_frame,
+            frames=frames_to_animate,
+        )
+        with _col:
+            st.components.v1.html(
+                animation.to_html5_video(),
+                width=300,
+                height=400,
+            )
+    else:
+        with _col:
+            st.pyplot(fig)
+    
+
 def display_choice(
     _frame_data: pd.DataFrame, # Not cached
     frame_idx: int,
@@ -263,7 +335,7 @@ def selection_to_image(_container, label):
     except:
         _container.write(f'{label=}')
 
-def create_form():
+def create_form(animate_flag: bool):
 # Read in (most recent) file with same sign name & populate selection value 
     # if frame already defined
     # csvs = glob(f'label_all*{SIGN_NAME}*.csv')
@@ -286,11 +358,11 @@ def create_form():
                 f' - Frame: {data_full.iloc[frame_idx]["frame"]:_}'
             )
             col1.write(f'Phrase: `{data_full.iloc[frame_idx,-1]}`')
-            
-            display_choice(
-                _frame_data=data_full,
+            display_frame(
+                frame_data=data_full,
                 frame_idx=frame_idx,
                 _col=col1,
+                animate=animate_flag,
             )
             # col1.write(f'')
             col2.selectbox(
@@ -327,8 +399,7 @@ if submitted_preform:
         data.values,
         n_clusters=n_clusters,
         columns=list(data.columns),
-        show_animations=animation_flag,
     )
 
     results_container = st.container()
-    create_form()
+    create_form(animation_flag)
