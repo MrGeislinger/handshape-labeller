@@ -18,7 +18,7 @@ from glob import glob
 ############### Constants ####################
 HANDSHAPE_IMAGES_DIR = 'handshape-images'
 HANDSHAPE_CSV = 'https://github.com/MrGeislinger/handshape-labeller/releases/download/v0.1.0/handshapes.csv'
-DATA_DIR = 'https://github.com/MrGeislinger/handshape-labeller/releases/download/v0.1.0/'
+DATA_DIR = '../ASL-FSR/data'
 ##############################################
 
 
@@ -53,7 +53,8 @@ def load_data(
     sample_size: int | None = None,
 ) -> pd.DataFrame:
     df_pq = pd.read_parquet(
-        f'{DATA_DIR}/{pq_path}'.replace('/','_')
+        f'{DATA_DIR}/{pq_path}'
+        # f'{DATA_DIR}/{pq_path}'.replace('/','_')
     )
     # Remove everything except the right hand
     data = df_pq[
