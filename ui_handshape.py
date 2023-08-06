@@ -13,6 +13,8 @@ from PIL import Image
 from visualize import get_hand_points
 from semisupervision import cluster_frames, get_distances_kmeans
 from glob import glob
+import joblib
+from datetime import datetime
 
 
 ############### Constants ####################
@@ -193,11 +195,10 @@ def show_rep_images(
     X: npt.ArrayLike,
     n_clusters: int,
     columns: list[str],
-) -> npt.ArrayLike:
+) -> tuple[npt.ArrayLike, npt.ArrayLike]:
     # Get clustering
     print('Start clustering')
     kmeans = cluster_frames(X, k=n_clusters)
-    # joblib.dump(kmeans, f'kmeans-sign_{SIGN_NAME}-{n_clusters}.joblib')
 
     print('get_representative_images')
     rep_frames, rep_frame_idx = get_representative_images(
@@ -221,7 +222,7 @@ def show_rep_images(
         frame = data_df.iloc[[j]]
         plot_handshape(frame, ax=ax)
     st.pyplot(fig)
-    return rep_frame_idx
+    return rep_frame_idx, kmeans
 
 
 def display_frame(
@@ -444,10 +445,20 @@ if submitted_preform:
         axis=1,
     )
 
-    frame_index = show_rep_images(
+    frame_index, kmeans = show_rep_images(
         X,
         n_clusters=n_clusters,
         columns=list(data.columns),
+    )
+    joblib.dump(
+        kmeans,
+        filename=(
+            f'kmeans'
+            f'-{pq_path.replace("/","-")}'
+            f'-{n_clusters}'
+            f'-{datetime.now().strftime("%Y%m%d-%H%M%S")}'
+            '.joblib'
+        ),
     )
 
     results_container = st.container()
