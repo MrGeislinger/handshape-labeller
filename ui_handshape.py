@@ -17,7 +17,7 @@ from glob import glob
 
 ############### Constants ####################
 HANDSHAPE_IMAGES_DIR = 'handshape-images'
-HANDSHAPE_CSV = 'https://github.com/MrGeislinger/handshape-labeller/releases/download/v0.1.0/train.csv'
+HANDSHAPE_CSV = 'https://github.com/MrGeislinger/handshape-labeller/releases/download/v0.1.0/handshapes.csv'
 DATA_DIR = '../ASL-FSR/data'
 ##############################################
 
@@ -377,7 +377,7 @@ preform = st.form('labeling_preset')
 
 # Load data
 # data = load_data(sample_size=1_000) # TODO: Allow sample size by choosing
-df_data = pd.read_csv(f'{DATA_DIR}/train.csv')
+df_data = pd.read_csv(f'https://github.com/MrGeislinger/handshape-labeller/releases/download/v0.1.0/train.csv')
 paths = df_data['path'].unique()
 
 with preform:
