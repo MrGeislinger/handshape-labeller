@@ -17,7 +17,7 @@ from glob import glob
 
 ############### Constants ####################
 HANDSHAPE_IMAGES_DIR = 'handshape-images'
-HANDSHAPE_CSV = 'handshapes.csv'
+HANDSHAPE_CSV = 'https://github.com/MrGeislinger/handshape-labeller/releases/download/v0.1.0/train.csv'
 DATA_DIR = '../ASL-FSR/data'
 ##############################################
 
