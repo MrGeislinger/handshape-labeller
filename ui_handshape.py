@@ -224,7 +224,6 @@ def show_rep_images(
     return rep_frame_idx
 
 
-
 def display_frame(
     frame_data: pd.DataFrame,
     frame_idx: int,
@@ -313,8 +312,6 @@ def display_choice(
         st.pyplot(fig)
 
 
-
-
 def write_labels_to_file():
     pass
     
@@ -325,6 +322,7 @@ def selection_to_image(_container, label):
         _container.image(image, f'{label=}')
     except:
         _container.write(f'{label=}')
+
 
 def create_form(animate_flag: bool, frame_buffer:int, n_freeze_frames:int):
 # Read in (most recent) file with same sign name & populate selection value 
@@ -423,6 +421,13 @@ if submitted_preform:
     )
     st.write(f'## File Loaded: `{pq_path}`')
     st.write(data.head())
+
+    # Image selection examples
+    images_containers = [st.columns(13) for i in range(5)]
+    for i,l in enumerate(handshapes['gloss'].to_list()[2:]):
+        c = images_containers[i//13][i%13]
+
+        selection_to_image(c, l)
 
     frame_index = show_rep_images(
         data.values,
