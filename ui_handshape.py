@@ -429,8 +429,23 @@ if submitted_preform:
 
         selection_to_image(c, l)
 
+    # Translate so palm is at origin
+    X = np.concatenate(
+        [
+            (
+                data[[c for c in data.columns if 'x_' in c]].values 
+                - data['x_right_hand_0'].values.reshape(-1,1)
+            ),
+            (
+                data[[c for c in data.columns if 'y_' in c]].values 
+                - data['y_right_hand_0'].values.reshape(-1,1)
+            ),
+        ],
+        axis=1,
+    )
+
     frame_index = show_rep_images(
-        data.values,
+        X,
         n_clusters=n_clusters,
         columns=list(data.columns),
     )
